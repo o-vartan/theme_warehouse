@@ -1,0 +1,119 @@
+<section class="section section--text-centered" data-section-id="{{ section.id }}" data-section-type="video">
+  <div class="container">
+    {%- if section.settings.title != blank -%}
+      <h2 class="heading h3">{{ section.settings.title | escape }}</h2>
+    {%- endif -%}
+
+    <div class="video-list">
+      {%- for block in section.blocks -%}
+        <div class="video-list__item" data-action="play-video" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+          <div class="video-wrapper" {% if block.settings.image %}style="background-image: url({{ block.settings.image | img_url: '1x1' }})"{% endif %}>
+            <div class="video-wrapper__image-wrapper">
+              {%- if block.settings.image -%}
+                {%- capture supported_sizes -%}{%- render 'image-size', sizes: '300,400,500,600,700,800,900,1000,1200', image: block.settings.image -%}{%- endcapture -%}
+                {%- assign image_url = block.settings.image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+
+                <img class="video-wrapper__image lazyload image--fade-in" data-src="{{ image_url }}" data-widths="[{{ supported_sizes }}]" data-sizes="auto" alt="{{ block.settings.image.alt | escape }}">
+
+                <noscript>
+                  <img class="video-wrapper__image" src="{{ block.settings.image | img_url: '800x' }}" alt="{{ block.settings.image.alt | escape }}">
+                </noscript>
+              {%- elsif block.settings.video_url.type == 'youtube' -%}
+                <img class="video-wrapper__image lazyload image--fade-in" data-src="https://img.youtube.com/vi/{{ block.settings.video_url.id }}/maxresdefault.jpg" alt="">
+              {%- else -%}
+                <div class="placeholder-background">
+                  {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {%- endif -%}
+
+              {% render 'icon', icon: 'play' %}
+            </div>
+
+            {% if block.settings.video_url.type == 'youtube' %}
+              <iframe data-src="https://www.youtube.com/embed/{{ block.settings.video_url.id }}?autoplay=1&showinfo=0&controls=1&rel=0&modestbranding=1" frameborder="0" allowfullscreen></iframe>
+              {% elsif block.settings.video_url.type == 'vimeo' %}
+              <iframe data-src="https://player.vimeo.com/video/{{ block.settings.video_url.id }}?autoplay=1&portrait=0&byline=0&color={{ settings.accent_color | remove_first: '#' }}" frameborder="0"></iframe>
+            {% endif %}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.blocks.size >= 2 -%}
+      <div class="scroller">
+        <div class="scroller__inner">
+          <div class="video-preview-list">
+            {%- for block in section.blocks -%}
+              <div class="video-preview-list__item {% if forloop.first %}is-selected{% endif %}" tabindex="0" data-action="select-video" data-video-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                <div class="video-wrapper">
+                  {%- if block.settings.image -%}
+                    <img class="video-wrapper__image lazyload image--fade-in" data-src="{{ block.settings.image | img_url: '350x' }}" alt="{{ block.settings.image.alt | escape }}">
+
+                    <noscript>
+                      <img class="video-wrapper__image" src="{{ block.settings.image | img_url: '350x' }}" alt="{{ block.settings.image.alt | escape }}">
+                    </noscript>
+                  {%- elsif block.settings.video_url.type == 'youtube' -%}
+                    <img class="video-wrapper__image lazyload image--fade-in" data-src="https://img.youtube.com/vi/{{ block.settings.video_url.id }}/mqdefault.jpg" alt="Video thumbnail">
+                  {%- else -%}
+                    <div class="placeholder-background">
+                      {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+
+                  {% render 'icon', icon: 'play' %}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Video",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Videos"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video",
+      "name": "Video",
+      "settings": [
+        {
+          "type": "video_url",
+          "id": "video_url",
+          "accept": ["vimeo", "youtube"],
+          "label": "Video",
+          "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "1200 x 700px .jpg recommended. Used when video is not loaded (required for Vimeo)."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Video",
+      "name": "Video",
+      "blocks": [
+        {
+          "type": "video"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
